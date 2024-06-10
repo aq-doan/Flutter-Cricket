@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'match_details.dart';
+import 'match_add.dart';  // Import the new MatchAdd page
 import 'match.dart';
 
 Future main() async {
@@ -55,11 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const MatchDetails();
-              });
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const MatchAdd())); // Navigate to MatchAdd page
         },
       ),
       body: Center(
@@ -80,8 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       },
                       child: ListTile(
                         title: Text(match.team1Name),
-                        subtitle:
-                            Text("VS ${match.team2Name}"),
+                        subtitle: Text("VS ${match.team2Name}"),
                         onTap: () {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
