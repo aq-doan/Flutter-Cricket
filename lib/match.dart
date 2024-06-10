@@ -5,6 +5,8 @@ class Match {
   late String id;
   String team1Name;
   String team2Name;
+  List<String> team1Players;
+  List<String> team2Players;
   int totalRuns;
   int wickets;
   int ballsDelivered;
@@ -13,6 +15,8 @@ class Match {
   Match({
     required this.team1Name,
     required this.team2Name,
+    this.team1Players = const [],
+    this.team2Players = const [],
     this.totalRuns = 0,
     this.wickets = 0,
     this.ballsDelivered = 0,
@@ -22,6 +26,8 @@ class Match {
   Match.fromJson(Map<String, dynamic> json, this.id)
       : team1Name = json['team1Name'],
         team2Name = json['team2Name'],
+        team1Players = List<String>.from(json['team1Players'] ?? []),
+        team2Players = List<String>.from(json['team2Players'] ?? []),
         totalRuns = json['totalRuns'],
         wickets = json['wickets'],
         ballsDelivered = json['ballsDelivered'],
@@ -30,6 +36,8 @@ class Match {
   Map<String, dynamic> toJson() => {
         'team1Name': team1Name,
         'team2Name': team2Name,
+        'team1Players': team1Players,
+        'team2Players': team2Players,
         'totalRuns': totalRuns,
         'wickets': wickets,
         'ballsDelivered': ballsDelivered,
