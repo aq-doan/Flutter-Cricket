@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'movie_details.dart';
-import 'movie.dart';
+import 'match_details.dart';
+import 'match_add.dart';  // Import the new MatchAdd page
+import 'match.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,16 +22,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //BEGIN: the old MyApp builder from last week
     return ChangeNotifierProvider(
-        create: (context) => MovieModel(),
+        create: (context) => MatchModel(),
         child: MaterialApp(
-            title: 'Database Tutorial',
+            title: 'Cricket Scoring App',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
-            home: const MyHomePage(title: 'Database Tutorial')));
-    //END: the old MyApp builder from last week
+            home: const MyHomePage(title: 'Cricket Scoring App')));
   }
 }
 
@@ -46,59 +45,50 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<MovieModel>(builder: buildScaffold);
+    return Consumer<MatchModel>(builder: buildScaffold);
   }
 
-  Scaffold buildScaffold(BuildContext context, MovieModel movieModel, _) {
+  Scaffold buildScaffold(BuildContext context, MatchModel matchModel, _) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const MovieDetails();
-              });
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const MatchAdd())); // Navigate to MatchAdd page
         },
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            //YOUR UI HERE
-            if (movieModel.loading)
+            if (matchModel.loading)
               const CircularProgressIndicator()
             else
               Expanded(
                 child: ListView.builder(
                   itemBuilder: (_, index) {
-                    var movie = movieModel.items[index];
-                    var image = movie.image;
+                    var match = matchModel.items[index];
                     return Dismissible(
-                      key: Key(movie.id), // Unique key for this item
+                      key: Key(match.id),
                       onDismissed: (direction) {
-                        // Call the delete function from your MovieModel
-                        movieModel.delete(movie.id);
+                        matchModel.delete(match.id);
                       },
                       child: ListTile(
-                        title: Text(movie.title),
-                        subtitle:
-                            Text("${movie.year} - ${movie.duration} Minutes"),
-                        leading: image != null ? Image.network(image) : null,
+                        title: Text(match.team1Name),
+                        subtitle: Text("VS ${match.team2Name}"),
                         onTap: () {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
-                            return MovieDetails(id: movie.id);
+                            return MatchDetails(id: match.id);
                           }));
                         },
                       ),
                     );
                   },
-                  itemCount: movieModel.items.length,
+                  itemCount: matchModel.items.length,
                 ),
               )
           ],
@@ -108,7 +98,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-//A little helper widget to avoid runtime errors -- we can't just display a Text() by itself if not inside a MaterialApp, so this workaround does the job
 class FullScreenText extends StatelessWidget {
   final String text;
 
