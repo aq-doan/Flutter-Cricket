@@ -52,92 +52,85 @@ class _MatchDetailsState extends State<MatchDetails> {
       appBar: AppBar(
         title: Text(adding ? "Add Match" : "Edit Match"),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(8),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            if (adding == false) Text("Match ID: ${widget.id}"),
-            Form(
-              key: _formKey,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: <Widget>[
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: "Team 1"),
-                      controller: team1Controller,
-                    ),
-                    // Add TextFormFields for each player in team 1
-                    for (var i = 0; i < 5; i++)
-                      TextFormField(
-                        decoration: InputDecoration(labelText: "Team 1 Player ${i + 1}"),
-                        controller: team1PlayersControllers[i],
-                      ),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: "Team 2"),
-                      controller: team2Controller,
-                    ),
-                    // Add TextFormFields for each player in team 2
-                    for (var i = 0; i < 5; i++)
-                      TextFormField(
-                        decoration: InputDecoration(labelText: "Team 2 Player ${i + 1}"),
-                        controller: team2PlayersControllers[i],
-                      ),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: "Total Runs"),
-                      controller: runsController,
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: "Wickets"),
-                      controller: wicketsController,
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: "Balls Delivered"),
-                      controller: ballsController,
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: "Extras"),
-                      controller: extrasController,
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          if (adding) {
-                            match = Match(
-                              team1Name: "",
-                              team2Name: "",
-                            );
-                          }
-                    
-                          match!.team1Name = team1Controller.text;
-                          match!.team2Name = team2Controller.text;
-                          match!.totalRuns = int.parse(runsController.text);
-                          match!.wickets = int.parse(wicketsController.text);
-                          match!.ballsDelivered = int.parse(ballsController.text);
-                          match!.extras = int.parse(extrasController.text);
-                    
-                          // Add players to the match
-                          match!.team1Players = team1PlayersControllers.map((controller) => controller.text).toList();
-                          match!.team2Players = team2PlayersControllers.map((controller) => controller.text).toList();
-                    
-                          if (adding) {
-                            await Provider.of<MatchModel>(context, listen: false).add(match!);
-                          } else {
-                            await Provider.of<MatchModel>(context, listen: false).updateItem(widget.id!, match!);
-                          }
-                    
-                          if (context.mounted) Navigator.pop(context);
-                        }
-                      },
-                      icon: const Icon(Icons.save),
-                      label: const Text("Save Values"),
-                    ),
-                  ],
-                ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              if (adding == false) Text("Match ID: ${widget.id}"),
+              TextFormField(
+                decoration: const InputDecoration(labelText: "Team 1"),
+                controller: team1Controller,
               ),
-            ),
-          ],
+              // Add TextFormFields for each player in team 1
+              for (var i = 0; i < 5; i++)
+                TextFormField(
+                  decoration: InputDecoration(labelText: "Team 1 Player ${i + 1}"),
+                  controller: team1PlayersControllers[i],
+                ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: "Team 2"),
+                controller: team2Controller,
+              ),
+              // Add TextFormFields for each player in team 2
+              for (var i = 0; i < 5; i++)
+                TextFormField(
+                  decoration: InputDecoration(labelText: "Team 2 Player ${i + 1}"),
+                  controller: team2PlayersControllers[i],
+                ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: "Total Runs"),
+                controller: runsController,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: "Wickets"),
+                controller: wicketsController,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: "Balls Delivered"),
+                controller: ballsController,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: "Extras"),
+                controller: extrasController,
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    if (adding) {
+                      match = Match(
+                        team1Name: "",
+                        team2Name: "",
+                      );
+                    }
+              
+                    match!.team1Name = team1Controller.text;
+                    match!.team2Name = team2Controller.text;
+                    match!.totalRuns = int.parse(runsController.text);
+                    match!.wickets = int.parse(wicketsController.text);
+                    match!.ballsDelivered = int.parse(ballsController.text);
+                    match!.extras = int.parse(extrasController.text);
+              
+                    // Add players to the match
+                    match!.team1Players = team1PlayersControllers.map((controller) => controller.text).toList();
+                    match!.team2Players = team2PlayersControllers.map((controller) => controller.text).toList();
+              
+                    if (adding) {
+                      await Provider.of<MatchModel>(context, listen: false).add(match!);
+                    } else {
+                      await Provider.of<MatchModel>(context, listen: false).updateItem(widget.id!, match!);
+                    }
+              
+                    if (context.mounted) Navigator.pop(context);
+                  }
+                },
+                icon: const Icon(Icons.save),
+                label: const Text("Save Values"),
+              ),
+            ],
+          ),
         ),
       ),
     );
