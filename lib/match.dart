@@ -78,7 +78,8 @@ class MatchModel extends ChangeNotifier {
     loading = true;
     update();
 
-    await matchesCollection.add(item.toJson());
+    DocumentReference docRef = await matchesCollection.add(item.toJson());
+    item.id = docRef.id;
     await fetch();
   }
 

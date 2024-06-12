@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'match.dart';
+import 'score_recording.dart'; // Import the ScoreRecording page
 
 class MatchAdd extends StatefulWidget {
   const MatchAdd({Key? key}) : super(key: key);
@@ -84,14 +85,25 @@ class _MatchAddState extends State<MatchAdd> {
                       team1Players: team1PlayersControllers.map((controller) => controller.text).toList(),
                       team2Players: team2PlayersControllers.map((controller) => controller.text).toList(),
                     );
-              
+
                     await Provider.of<MatchModel>(context, listen: false).add(newMatch);
-              
-                    if (context.mounted) Navigator.pop(context);
+
+                    // Fetch the added match to get its ID
+                    var matchModel = Provider.of<MatchModel>(context, listen: false);
+                    Match? addedMatch = matchModel.items.firstWhere((match) =>
+                      match.team1Name == newMatch.team1Name &&
+                      match.team2Name == newMatch.team2Name &&
+                      match.totalRuns == newMatch.totalRuns &&
+                      match.wickets == newMatch.wickets);
+
+                    if (addedMatch != null && context.mounted) {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => ScoreRecording(match: addedMatch))); // Pass the match with its ID
+                    }
                   }
                 },
                 icon: const Icon(Icons.save),
-                label: const Text("Add Match"),
+                label: const Text("Start Match"),
               ),
             ],
           ),
