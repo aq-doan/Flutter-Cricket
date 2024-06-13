@@ -39,12 +39,12 @@ class _MatchDetailsState extends State<MatchDetails> {
 
       for (int i = 0; i < team1PlayersControllers.length; i++) {
         if (i < match.team1Players.length) {
-          team1PlayersControllers[i].text = match.team1Players[i];
+          team1PlayersControllers[i].text = match.team1Players[i].name;
         }
       }
       for (int i = 0; i < team2PlayersControllers.length; i++) {
         if (i < match.team2Players.length) {
-          team2PlayersControllers[i].text = match.team2Players[i];
+          team2PlayersControllers[i].text = match.team2Players[i].name;
         }
       }
     }
@@ -115,8 +115,8 @@ class _MatchDetailsState extends State<MatchDetails> {
                     match!.extras = int.parse(extrasController.text);
               
                     // Add players to the match
-                    match!.team1Players = team1PlayersControllers.map((controller) => controller.text).toList();
-                    match!.team2Players = team2PlayersControllers.map((controller) => controller.text).toList();
+                    match!.team1Players = team1PlayersControllers.map((controller) => PlayerStats(name: controller.text)).toList();
+                    match!.team2Players = team2PlayersControllers.map((controller) => PlayerStats(name: controller.text)).toList();
               
                     if (adding) {
                       await Provider.of<MatchModel>(context, listen: false).add(match!);

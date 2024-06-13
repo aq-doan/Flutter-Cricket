@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+import 'match.dart';
+import 'match_details.dart';
+import 'score_recording.dart';
+
+class PlayerDetail extends StatelessWidget {
+  final String playerName;
+  final Match match;
+
+  const PlayerDetail({Key? key, required this.playerName, required this.match}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    int playerIndex;
+    bool isBatter = match.team1Players.contains(playerName);
+
+    if (isBatter) {
+      playerIndex = match.team1Players.indexOf(playerName);
+    } else {
+      playerIndex = match.team2Players.indexOf(playerName);
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Player Details: $playerName"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Name: $playerName", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Divider(),
+            if (isBatter) ...[
+              Text("Runs Scored: ${match.team1Runs[playerIndex]}", style: TextStyle(fontSize: 20)),
+              Text("Balls Faced: ${match.team1BallsFaced[playerIndex]}", style: TextStyle(fontSize: 20)),
+            ] else ...[
+              Text("Runs Lost: ${match.team2RunsLost[playerIndex]}", style: TextStyle(fontSize: 20)),
+              Text("Balls Delivered: ${match.team2BallsDelivered[playerIndex]}", style: TextStyle(fontSize: 20)),
+              Text("Wickets Taken: ${match.team2WicketsTaken[playerIndex]}", style: TextStyle(fontSize: 20)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
