@@ -82,8 +82,8 @@ class _MatchAddState extends State<MatchAdd> {
                     Match newMatch = Match(
                       team1Name: team1Controller.text,
                       team2Name: team2Controller.text,
-                      team1Players: team1PlayersControllers.map((controller) => controller.text).toList(),
-                      team2Players: team2PlayersControllers.map((controller) => controller.text).toList(),
+                      team1Players: team1PlayersControllers.map((controller) => PlayerStats(name: controller.text)).toList(),
+                      team2Players: team2PlayersControllers.map((controller) => PlayerStats(name: controller.text)).toList(),
                     );
 
                     await Provider.of<MatchModel>(context, listen: false).add(newMatch);
@@ -112,3 +112,4 @@ class _MatchAddState extends State<MatchAdd> {
     );
   }
 }
+

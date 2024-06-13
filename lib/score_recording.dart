@@ -17,7 +17,7 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   int currentBowlerIndex = 0;
   int ballsDelivered = 0;
   int extras = 0;
-  bool isGameOver = false; 
+  bool isGameOver = false;
 
   @override
   Widget build(BuildContext context) {
@@ -54,22 +54,31 @@ class _ScoreRecordingState extends State<ScoreRecording> {
               children: [
                 TableRow(children: [
                   Text("On-strike Batter", style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text("${match.team1Players[currentBatterIndex]}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${match.team1Players[currentBatterIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Runs: ${match.team1Players[currentBatterIndex].runs}"),
+                  Text("Balls Faced: ${match.team1Players[currentBatterIndex].ballsFaced}"),
+                  Text(""), // Added this line
                 ]),
                 TableRow(children: [
                   Text("Off-strike Batter", style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text("${match.team1Players[nonStrikerIndex]}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${match.team1Players[nonStrikerIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Runs: ${match.team1Players[nonStrikerIndex].runs}"),
+                  Text("Balls Faced: ${match.team1Players[nonStrikerIndex].ballsFaced}"),
+                  Text(""), // Added this line
                 ]),
                 TableRow(children: [
                   Text("Bowler", style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text("${match.team2Players[currentBowlerIndex]}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${match.team2Players[currentBowlerIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Runs Lost: ${match.team2Players[currentBowlerIndex].runsLost}"),
+                  Text("Wickets: ${match.team2Players[currentBowlerIndex].wickets}"),
+                  Text("Balls Delivered: ${match.team2Players[currentBowlerIndex].ballsDelivered}"),
                 ]),
               ],
             ),
             const Divider(),
             Row(
               children: <Widget>[
-                for (var outcome in ["0", "1", "2", "3", "4", "6", "W", "NB", "WD"]) 
+                for (var outcome in ["0", "1", "2", "3", "4", "6", "W", "NB", "WD"])
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
@@ -89,25 +98,33 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   void handleOutcome(String outcome) {
     if (isGameOver) return;
     setState(() {
+      var currentBatter = widget.match.team1Players[currentBatterIndex];
+      var currentBowler = widget.match.team2Players[currentBowlerIndex];
+
       if (outcome == "W") {
         showWicketDialog();
       } else if (outcome == "NB" || outcome == "WD") {
         widget.match.totalRuns += 1;
         extras += 1;
+        currentBowler.runsLost += 1;
       } else {
         int runs = int.parse(outcome);
         widget.match.totalRuns += runs;
+        currentBatter.runs += runs;
+        currentBatter.ballsFaced += 1;
+        currentBowler.runsLost += runs;
+        currentBowler.ballsDelivered += 1;
+        ballsDelivered += 1;
         if (runs % 2 != 0) {
           swapBatters();
         }
-        ballsDelivered += 1;
       }
-      
+
       if (ballsDelivered % 6 == 0 && ballsDelivered != 0) {
         swapBatters();
         currentBowlerIndex = (currentBowlerIndex + 1) % widget.match.team2Players.length;
       }
-      
+
       if (ballsDelivered >= 30 || widget.match.wickets >= 4) {
         showGameOverDialog();
       }
@@ -163,6 +180,8 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   void recordWicket(String type) {
     Navigator.pop(context);
     setState(() {
+      var currentBowler = widget.match.team2Players[currentBowlerIndex];
+      currentBowler.wickets += 1;
       widget.match.wickets += 1;
       if (widget.match.wickets >= 4) {
         showGameOverDialog();
@@ -179,8 +198,8 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   }
 
   void showGameOverDialog() {
-    setState(() { 
-      isGameOver = true; 
+    setState(() {
+      isGameOver = true;
     });
     showDialog(
       context: context,
