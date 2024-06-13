@@ -46,6 +46,9 @@ class Match {
   int wickets;
   int ballsDelivered;
   int extras;
+  double runRate;
+  String overs;
+  bool isCompleted;
 
   Match({
     required this.team1Name,
@@ -56,6 +59,9 @@ class Match {
     this.wickets = 0,
     this.ballsDelivered = 0,
     this.extras = 0,
+    this.runRate = 0.0,
+    this.overs = "0.0",
+    this.isCompleted = false,
   });
 
   Match.fromJson(Map<String, dynamic> json, this.id)
@@ -70,7 +76,10 @@ class Match {
         totalRuns = json['totalRuns'],
         wickets = json['wickets'],
         ballsDelivered = json['ballsDelivered'],
-        extras = json['extras'];
+        extras = json['extras'],
+        runRate = json['runRate'],
+        overs = json['overs'],
+        isCompleted = json['isCompleted'];
 
   Map<String, dynamic> toJson() => {
         'team1Name': team1Name,
@@ -81,8 +90,12 @@ class Match {
         'wickets': wickets,
         'ballsDelivered': ballsDelivered,
         'extras': extras,
+        'runRate': runRate,
+        'overs': overs,
+        'isCompleted': isCompleted,
       };
 }
+
 class MatchModel extends ChangeNotifier {
   final List<Match> items = [];
   CollectionReference matchesCollection =

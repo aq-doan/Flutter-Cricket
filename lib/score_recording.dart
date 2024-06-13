@@ -20,6 +20,13 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   bool isGameOver = false;
 
   @override
+  void initState() {
+    super.initState();
+    ballsDelivered = widget.match.ballsDelivered;
+    extras = widget.match.extras;
+  }
+
+  @override
   Widget build(BuildContext context) {
     var match = widget.match;
     return Scaffold(
@@ -30,8 +37,7 @@ class _ScoreRecordingState extends State<ScoreRecording> {
             icon: const Icon(Icons.save),
             onPressed: () async {
               // Save the updated match details
-              match.ballsDelivered = ballsDelivered;
-              match.extras = extras;
+              updateMatchDetails();
               await Provider.of<MatchModel>(context, listen: false).updateItem(match.id, match);
               Navigator.pop(context); // Navigate back to main page
             },
@@ -48,9 +54,10 @@ class _ScoreRecordingState extends State<ScoreRecording> {
             Text("Score: ${match.wickets} / ${match.totalRuns}", style: TextStyle(fontSize: 48)),
             Text("RUN RATE: ${(match.totalRuns / (ballsDelivered / 6)).toStringAsFixed(2)}"),
             Text("OVERS: ${ballsDelivered ~/ 6}.${ballsDelivered % 6}"),
+            Text("EXTRAS: ${match.extras}"),
             const Divider(),
             Table(
-              border: TableBorder.all(),
+              //border: TableBorder.all(),
               children: [
                 TableRow(children: [
                   Text("On-strike Batter", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -81,7 +88,7 @@ class _ScoreRecordingState extends State<ScoreRecording> {
                 for (var outcome in ["0", "1", "2", "3", "4", "6", "W", "NB", "WD"])
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: match.isCompleted ? null : () {
                         handleOutcome(outcome);
                       },
                       child: Text(outcome),
@@ -115,14 +122,22 @@ class _ScoreRecordingState extends State<ScoreRecording> {
         currentBowler.runsLost += runs;
         currentBowler.ballsDelivered += 1;
         ballsDelivered += 1;
+
+        if (ballsDelivered % 6 == 0) {
+          // End of over, swap batters and bowler
+          swapBatters();
+          currentBowlerIndex = (currentBowlerIndex + 1) % widget.match.team2Players.length;
+        }
+
         if (runs % 2 != 0) {
+          // Odd runs, swap batters
           swapBatters();
         }
-      }
 
-      if (ballsDelivered % 6 == 0 && ballsDelivered != 0) {
-        swapBatters();
-        currentBowlerIndex = (currentBowlerIndex + 1) % widget.match.team2Players.length;
+        // End of over, swap batters again
+        if (ballsDelivered % 6 == 0) {
+          swapBatters();
+        }
       }
 
       if (ballsDelivered >= 30 || widget.match.wickets >= 4) {
@@ -187,6 +202,9 @@ class _ScoreRecordingState extends State<ScoreRecording> {
         showGameOverDialog();
       } else {
         currentBatterIndex += 1;
+        if (currentBatterIndex >= widget.match.team1Players.length) {
+          currentBatterIndex = 0;
+        }
       }
     });
   }
@@ -194,7 +212,12 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   void swapBatters() {
     int temp = currentBatterIndex;
     currentBatterIndex = nonStrikerIndex;
-    nonStrikerIndex = temp;
+    nonStrikerIndex = (nonStrikerIndex + 1) % widget.match.team1Players.length;
+
+    // Ensure nonStrikerIndex is not the same as currentBatterIndex
+    if (nonStrikerIndex == currentBatterIndex) {
+      nonStrikerIndex = (nonStrikerIndex + 1) % widget.match.team1Players.length;
+    }
   }
 
   void showGameOverDialog() {
@@ -209,9 +232,8 @@ class _ScoreRecordingState extends State<ScoreRecording> {
         actions: <Widget>[
           TextButton(
             onPressed: () async {
-              // Save the updated match details
-              widget.match.ballsDelivered = ballsDelivered;
-              widget.match.extras = extras;
+              updateMatchDetails();
+              widget.match.isCompleted = true;
               await Provider.of<MatchModel>(context, listen: false).updateItem(widget.match.id, widget.match);
               Navigator.pop(context);
             },
@@ -220,5 +242,12 @@ class _ScoreRecordingState extends State<ScoreRecording> {
         ],
       ),
     );
+  }
+
+  void updateMatchDetails() {
+    widget.match.ballsDelivered = ballsDelivered;
+    widget.match.extras = extras;
+    widget.match.runRate = (widget.match.totalRuns / (ballsDelivered / 6)).toDouble();
+    widget.match.overs = "${ballsDelivered ~/ 6}.${ballsDelivered % 6}";
   }
 }
