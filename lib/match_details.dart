@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'match.dart';
+import 'score_recording.dart';
 
 class MatchDetails extends StatefulWidget {
   final String? id;
@@ -129,6 +130,19 @@ class _MatchDetailsState extends State<MatchDetails> {
                 icon: const Icon(Icons.save),
                 label: const Text("Save Values"),
               ),
+              if (!adding)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ScoreRecording(match: match!),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.visibility),
+                  label: const Text("View Score Recording"),
+                ),
             ],
           ),
         ),
