@@ -1,6 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+class BallOutcome {
+  String type; // "run", "dot", "extra", "wicket"
+  int runs; // Number of runs, 0 if type is "dot" or "wicket"
+  String description; // Detailed description like "Run 3", "Wide", "Caught", etc.
+  String batter;
+  String bowler;
+
+  BallOutcome({
+    required this.type,
+    this.runs = 0,
+    required this.description,
+    required this.batter,
+    required this.bowler,
+  });
+
+  BallOutcome.fromJson(Map<String, dynamic> json)
+      : type = json['type'],
+        runs = json['runs'],
+        description = json['description'],
+        batter = json['batter'],
+        bowler = json['bowler'];
+
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'runs': runs,
+        'description': description,
+        'batter': batter,
+        'bowler': bowler,
+      };
+}
+
 class PlayerStats {
   String name;
   int runs;
@@ -49,6 +80,7 @@ class Match {
   double runRate;
   String overs;
   bool isCompleted;
+  List<BallOutcome> ballOutcomes;
 
   Match({
     required this.team1Name,
@@ -62,8 +94,10 @@ class Match {
     this.runRate = 0.0,
     this.overs = "0.0",
     this.isCompleted = false,
+    List<BallOutcome>? ballOutcomes,
   })  : team1Players = team1Players ?? List.generate(5, (index) => PlayerStats(name: "Batter ${index + 1}")),
-        team2Players = team2Players ?? List.generate(5, (index) => PlayerStats(name: "Bowler ${index + 1}"));
+        team2Players = team2Players ?? List.generate(5, (index) => PlayerStats(name: "Bowler ${index + 1}")),
+        ballOutcomes = ballOutcomes ?? [];
 
   Match.fromJson(Map<String, dynamic> json, this.id)
       : team1Name = json['team1Name'],
@@ -82,7 +116,11 @@ class Match {
         extras = json['extras'],
         runRate = json['runRate'],
         overs = json['overs'],
-        isCompleted = json['isCompleted'];
+        isCompleted = json['isCompleted'],
+        ballOutcomes = (json['ballOutcomes'] as List?)
+                ?.map((item) => BallOutcome.fromJson(item))
+                .toList() ??
+            [];
 
   Map<String, dynamic> toJson() => {
         'team1Name': team1Name,
@@ -96,6 +134,7 @@ class Match {
         'runRate': runRate,
         'overs': overs,
         'isCompleted': isCompleted,
+        'ballOutcomes': ballOutcomes.map((outcome) => outcome.toJson()).toList(),
       };
 }
 
@@ -143,6 +182,25 @@ class MatchModel extends ChangeNotifier {
 
     await matchesCollection.doc(id).set(item.toJson());
     await fetch();
+  }
+
+  Future updatePlayer(PlayerStats player) async {
+    for (var match in items) {
+      for (var p in match.team1Players) {
+        if (p.name == player.name) {
+          p.name = player.name;
+          await updateItem(match.id, match);
+          return;
+        }
+      }
+      for (var p in match.team2Players) {
+        if (p.name == player.name) {
+          p.name = player.name;
+          await updateItem(match.id, match);
+          return;
+        }
+      }
+    }
   }
 
   Future delete(String id) async {
