@@ -73,14 +73,20 @@ class _MatchDetailsState extends State<MatchDetails> {
               // Add TextFormFields for each player in team 1
               for (var i = 0; i < 5; i++)
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     if (match != null && i < (match?.team1Players?.length ?? 0)) {
-                      Navigator.push(
+                      var result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => PlayerDetail(player: match?.team1Players?[i] ?? PlayerStats(name: "Unknown")),
                         ),
                       );
+                
+                      if (result == 'update') {
+                        setState(() {
+                          match = Provider.of<MatchModel>(context, listen: false).get(widget.id);
+                        });
+                      }
                     }
                   },
                   child: AbsorbPointer(
@@ -97,20 +103,26 @@ class _MatchDetailsState extends State<MatchDetails> {
               // Add TextFormFields for each player in team 2
               for (var i = 0; i < 5; i++)
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     if (match != null && i < (match?.team2Players?.length ?? 0)) {
-                      Navigator.push(
+                      var result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => PlayerDetail(player: match?.team2Players?[i] ?? PlayerStats(name: "Unknown")),
                         ),
                       );
+                
+                      if (result == 'update') {
+                        setState(() {
+                          match = Provider.of<MatchModel>(context, listen: false).get(widget.id);
+                        });
+                      }
                     }
                   },
                   child: AbsorbPointer(
                     child: TextFormField(
                       decoration: InputDecoration(labelText: "Team 2 Player ${i + 1}"),
-                      controller: team2PlayersControllers[i],
+                      controller: team1PlayersControllers[i],
                     ),
                   ),
                 ),
