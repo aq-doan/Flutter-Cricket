@@ -12,26 +12,23 @@ class ScoreRecording extends StatefulWidget {
 }
 
 class _ScoreRecordingState extends State<ScoreRecording> {
-  late Match match;
   int currentBatterIndex = 0;
   int nonStrikerIndex = 1;
   int currentBowlerIndex = 0;
   int ballsDelivered = 0;
   int extras = 0;
   bool isGameOver = false;
-  List<Match> matchHistory = [];
 
   @override
   void initState() {
     super.initState();
-    match = widget.match.copy();
-    ballsDelivered = match.ballsDelivered;
-    extras = match.extras;
-    matchHistory.add(match.copy());
+    ballsDelivered = widget.match.ballsDelivered;
+    extras = widget.match.extras;
   }
 
   @override
   Widget build(BuildContext context) {
+    var match = widget.match;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Score Recording"),
@@ -42,166 +39,65 @@ class _ScoreRecordingState extends State<ScoreRecording> {
               // Save the updated match details
               updateMatchDetails();
               await Provider.of<MatchModel>(context, listen: false).updateItem(match.id, match);
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Navigate back to main page
+              Navigator.pop(context); // Navigate back to main page
             },
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text("BATTING: ${match.team1Name}"),
-                Text("BOWLING: ${match.team2Name}"),
-                Text("Score: ${match.wickets} / ${match.totalRuns}", style: TextStyle(fontSize: 48)),
-                Text("RUN RATE: ${(match.totalRuns / (ballsDelivered / 6)).toStringAsFixed(2)}"),
-                Text("OVERS: ${ballsDelivered ~/ 6}.${ballsDelivered % 6}"),
-                Text("EXTRAS: ${match.extras}"),
-                const Divider(),
-                Table(
-                  children: [
-                    TableRow(children: [
-                      Text("On-strike Batter", style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text("${match.team1Players[currentBatterIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text("Runs: ${match.team1Players[currentBatterIndex].runs}"),
-                      Text("Balls: ${match.team1Players[currentBatterIndex].ballsFaced}"),
-                      Text(""), // Added this line
-                    ]),
-                    TableRow(children: [
-                      Text("Off-strike Batter", style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text("${match.team1Players[nonStrikerIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text("Runs: ${match.team1Players[nonStrikerIndex].runs}"),
-                      Text("Balls: ${match.team1Players[nonStrikerIndex].ballsFaced}"),
-                      Text(""), // Added this line
-                    ]),
-                    TableRow(children: [
-                      Text("Bowler", style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text("${match.team2Players[currentBowlerIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text("Lost: ${match.team2Players[currentBowlerIndex].runsLost}"),
-                      Text("Wickets: ${match.team2Players[currentBowlerIndex].wickets}"),
-                      Text("Balls: ${match.team2Players[currentBowlerIndex].ballsDelivered}"),
-                    ]),
-                  ],
-                ),
-                const Divider(),
-                Text("Ball Outcome:", style: TextStyle(fontWeight: FontWeight.bold)),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: match.ballOutcomes.map((outcome) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Chip(
-                        label: Text("${outcome.description} (Batter: ${outcome.batter}, Bowler: ${outcome.bowler})"),
-                      ),
-                    )).toList(),
-                  ),
-                ),
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    for (var outcome in ["0", "1", "2"])
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 4),
-                          child: ElevatedButton(
-                            onPressed: match.isCompleted ? null : () {
-                              handleOutcome(outcome);
-                            },
-                            child: Center(
-                              child: Text(outcome),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              shape: CircleBorder(),
-                              padding: EdgeInsets.all(16),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    for (var outcome in ["3", "4", "6"])
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 4),
-                          child: ElevatedButton(
-                            onPressed: match.isCompleted ? null : () {
-                              handleOutcome(outcome);
-                            },
-                            child: Center(
-                              child: Text(outcome),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              shape: CircleBorder(),
-                              padding: EdgeInsets.all(16),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    for (var outcome in ["W", "NB", "WD"])
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 4),
-                          child: ElevatedButton(
-                            onPressed: match.isCompleted ? null : () {
-                              handleOutcome(outcome);
-                            },
-                            child: Center(
-                              child: Text(outcome),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              shape: CircleBorder(),
-                              padding: EdgeInsets.all(16),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text("BATTING: ${match.team1Name}"),
+            Text("BOWLING: ${match.team2Name}"),
+            Text("Score: ${match.wickets} / ${match.totalRuns}", style: TextStyle(fontSize: 48)),
+            Text("RUN RATE: ${(match.totalRuns / (ballsDelivered / 6)).toStringAsFixed(2)}"),
+            Text("OVERS: ${ballsDelivered ~/ 6}.${ballsDelivered % 6}"),
+            Text("EXTRAS: ${match.extras}"),
+            const Divider(),
+            Table(
+              //border: TableBorder.all(),
+              children: [
+                TableRow(children: [
+                  Text("On-strike Batter", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${match.team1Players[currentBatterIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Runs: ${match.team1Players[currentBatterIndex].runs}"),
+                  Text("Balls Faced: ${match.team1Players[currentBatterIndex].ballsFaced}"),
+                  Text(""), // Added this line
+                ]),
+                TableRow(children: [
+                  Text("Off-strike Batter", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${match.team1Players[nonStrikerIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Runs: ${match.team1Players[nonStrikerIndex].runs}"),
+                  Text("Balls Faced: ${match.team1Players[nonStrikerIndex].ballsFaced}"),
+                  Text(""), // Added this line
+                ]),
+                TableRow(children: [
+                  Text("Bowler", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${match.team2Players[currentBowlerIndex].name}", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Runs Lost: ${match.team2Players[currentBowlerIndex].runsLost}"),
+                  Text("Wickets: ${match.team2Players[currentBowlerIndex].wickets}"),
+                  Text("Balls Delivered: ${match.team2Players[currentBowlerIndex].ballsDelivered}"),
+                ]),
               ],
             ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: resetMatch,
-                    child: Text("Reset"),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(),
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            const Divider(),
+            Row(
+              children: <Widget>[
+                for (var outcome in ["0", "1", "2", "3", "4", "6", "W", "NB", "WD"])
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: match.isCompleted ? null : () {
+                        handleOutcome(outcome);
+                      },
+                      child: Text(outcome),
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: undoLastAction,
-                    child: Text("Undo"),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(),
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -209,47 +105,28 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   void handleOutcome(String outcome) {
     if (isGameOver) return;
     setState(() {
-      // Save the current state before making changes
-      matchHistory.add(match.copy());
-
-      var currentBatter = match.team1Players[currentBatterIndex];
-      var currentBowler = match.team2Players[currentBowlerIndex];
-      BallOutcome ballOutcome;
+      var currentBatter = widget.match.team1Players[currentBatterIndex];
+      var currentBowler = widget.match.team2Players[currentBowlerIndex];
 
       if (outcome == "W") {
         showWicketDialog();
       } else if (outcome == "NB" || outcome == "WD") {
-        match.totalRuns += 1;
+        widget.match.totalRuns += 1;
         extras += 1;
         currentBowler.runsLost += 1;
-        ballOutcome = BallOutcome(
-          type: "extra",
-          description: outcome == "NB" ? "No Ball" : "Wide",
-          batter: currentBatter.name,
-          bowler: currentBowler.name,
-        );
-        match.ballOutcomes.add(ballOutcome);
       } else {
         int runs = int.parse(outcome);
-        match.totalRuns += runs;
+        widget.match.totalRuns += runs;
         currentBatter.runs += runs;
         currentBatter.ballsFaced += 1;
         currentBowler.runsLost += runs;
         currentBowler.ballsDelivered += 1;
         ballsDelivered += 1;
-        ballOutcome = BallOutcome(
-          type: "run",
-          runs: runs,
-          description: "Run $runs",
-          batter: currentBatter.name,
-          bowler: currentBowler.name,
-        );
-        match.ballOutcomes.add(ballOutcome);
 
         if (ballsDelivered % 6 == 0) {
           // End of over, swap batters and bowler
           swapBatters();
-          currentBowlerIndex = (currentBowlerIndex + 1) % match.team2Players.length;
+          currentBowlerIndex = (currentBowlerIndex + 1) % widget.match.team2Players.length;
         }
 
         if (runs % 2 != 0) {
@@ -263,40 +140,14 @@ class _ScoreRecordingState extends State<ScoreRecording> {
         }
       }
 
-      if (ballsDelivered >= 30 || match.wickets >= 4) {
+      if (ballsDelivered >= 30 || widget.match.wickets >= 4) {
         showGameOverDialog();
       }
 
       // Update the match object
-      match.ballsDelivered = ballsDelivered;
-      match.extras = extras;
+      widget.match.ballsDelivered = ballsDelivered;
+      widget.match.extras = extras;
     });
-  }
-
-  void resetMatch() {
-    setState(() {
-      match.reset(); // Assume you have a reset method in Match class
-      ballsDelivered = 0;
-      extras = 0;
-      isGameOver = false;
-      currentBatterIndex = 0;
-      nonStrikerIndex = 1;
-      currentBowlerIndex = 0;
-      matchHistory.clear();
-      matchHistory.add(match.copy());
-    });
-  }
-
-  void undoLastAction() {
-    if (matchHistory.length > 1) {
-      setState(() {
-        matchHistory.removeLast();
-        match = matchHistory.last.copy();
-        ballsDelivered = match.ballsDelivered;
-        extras = match.extras;
-        // Restore other states if needed
-      });
-    }
   }
 
   void showWicketDialog() {
@@ -344,21 +195,14 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   void recordWicket(String type) {
     Navigator.pop(context);
     setState(() {
-      var currentBowler = match.team2Players[currentBowlerIndex];
+      var currentBowler = widget.match.team2Players[currentBowlerIndex];
       currentBowler.wickets += 1;
-      match.wickets += 1;
-      BallOutcome ballOutcome = BallOutcome(
-        type: "wicket",
-        description: type,
-        batter: match.team1Players[currentBatterIndex].name,
-        bowler: currentBowler.name,
-      );
-      match.ballOutcomes.add(ballOutcome);
-      if (match.wickets >= 4) {
+      widget.match.wickets += 1;
+      if (widget.match.wickets >= 4) {
         showGameOverDialog();
       } else {
         currentBatterIndex += 1;
-        if (currentBatterIndex >= match.team1Players.length) {
+        if (currentBatterIndex >= widget.match.team1Players.length) {
           currentBatterIndex = 0;
         }
       }
@@ -366,8 +210,14 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   }
 
   void swapBatters() {
-    currentBatterIndex = (currentBatterIndex + 1) % match.team1Players.length;
-    nonStrikerIndex = (currentBatterIndex + 1) % match.team1Players.length;
+    int temp = currentBatterIndex;
+    currentBatterIndex = nonStrikerIndex;
+    nonStrikerIndex = (nonStrikerIndex + 1) % widget.match.team1Players.length;
+
+    // Ensure nonStrikerIndex is not the same as currentBatterIndex
+    if (nonStrikerIndex == currentBatterIndex) {
+      nonStrikerIndex = (nonStrikerIndex + 1) % widget.match.team1Players.length;
+    }
   }
 
   void showGameOverDialog() {
@@ -378,14 +228,14 @@ class _ScoreRecordingState extends State<ScoreRecording> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Game Over"),
-        content: Text(match.wickets >= 4 ? "All batters are out." : "All overs completed."),
+        content: Text(widget.match.wickets >= 4 ? "All batters are out." : "All overs completed."),
         actions: <Widget>[
           TextButton(
             onPressed: () async {
               updateMatchDetails();
-              match.isCompleted = true;
-              await Provider.of<MatchModel>(context, listen: false).updateItem(match.id, match);
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Navigate back to main page
+              widget.match.isCompleted = true;
+              await Provider.of<MatchModel>(context, listen: false).updateItem(widget.match.id, widget.match);
+              Navigator.pop(context);
             },
             child: const Text("OK"),
           ),
@@ -395,9 +245,9 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   }
 
   void updateMatchDetails() {
-    match.ballsDelivered = ballsDelivered;
-    match.extras = extras;
-    match.runRate = (match.totalRuns / (ballsDelivered / 6)).toDouble();
-    match.overs = "${ballsDelivered ~/ 6}.${ballsDelivered % 6}";
+    widget.match.ballsDelivered = ballsDelivered;
+    widget.match.extras = extras;
+    widget.match.runRate = (widget.match.totalRuns / (ballsDelivered / 6)).toDouble();
+    widget.match.overs = "${ballsDelivered ~/ 6}.${ballsDelivered % 6}";
   }
 }
