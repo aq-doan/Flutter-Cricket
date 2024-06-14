@@ -68,7 +68,7 @@ class PlayerStats {
 }
 
 class Match {
-  late String id;
+  String id;
   String team1Name;
   String team2Name;
   List<PlayerStats> team1Players;
@@ -95,7 +95,8 @@ class Match {
     this.overs = "0.0",
     this.isCompleted = false,
     List<BallOutcome>? ballOutcomes,
-  })  : team1Players = team1Players ?? List.generate(5, (index) => PlayerStats(name: "Batter ${index + 1}")),
+  })  : id = "",
+        team1Players = team1Players ?? List.generate(5, (index) => PlayerStats(name: "Batter ${index + 1}")),
         team2Players = team2Players ?? List.generate(5, (index) => PlayerStats(name: "Bowler ${index + 1}")),
         ballOutcomes = ballOutcomes ?? [];
 
@@ -136,8 +137,44 @@ class Match {
         'isCompleted': isCompleted,
         'ballOutcomes': ballOutcomes.map((outcome) => outcome.toJson()).toList(),
       };
-}
 
+  Match copy() {
+    return Match(
+      team1Name: team1Name,
+      team2Name: team2Name,
+      team1Players: team1Players.map((player) => PlayerStats.fromJson(player.toJson())).toList(),
+      team2Players: team2Players.map((player) => PlayerStats.fromJson(player.toJson())).toList(),
+      totalRuns: totalRuns,
+      wickets: wickets,
+      ballsDelivered: ballsDelivered,
+      extras: extras,
+      runRate: runRate,
+      overs: overs,
+      isCompleted: isCompleted,
+      ballOutcomes: ballOutcomes.map((outcome) => BallOutcome.fromJson(outcome.toJson())).toList(),
+    )..id = id;
+  }
+
+  void reset() {
+    totalRuns = 0;
+    wickets = 0;
+    ballsDelivered = 0;
+    extras = 0;
+    runRate = 0.0;
+    overs = "0.0";
+    isCompleted = false;
+    ballOutcomes.clear();
+    for (var player in team1Players) {
+      player.runs = 0;
+      player.ballsFaced = 0;
+    }
+    for (var player in team2Players) {
+      player.ballsDelivered = 0;
+      player.runsLost = 0;
+      player.wickets = 0;
+    }
+  }
+}
 class MatchModel extends ChangeNotifier {
   final List<Match> items = [];
   CollectionReference matchesCollection =
