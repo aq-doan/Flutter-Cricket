@@ -53,8 +53,8 @@ class Match {
   Match({
     required this.team1Name,
     required this.team2Name,
-    this.team1Players = const [],
-    this.team2Players = const [],
+    List<PlayerStats>? team1Players,
+    List<PlayerStats>? team2Players,
     this.totalRuns = 0,
     this.wickets = 0,
     this.ballsDelivered = 0,
@@ -62,17 +62,20 @@ class Match {
     this.runRate = 0.0,
     this.overs = "0.0",
     this.isCompleted = false,
-  });
+  })  : team1Players = team1Players ?? List.generate(5, (index) => PlayerStats(name: "Batter ${index + 1}")),
+        team2Players = team2Players ?? List.generate(5, (index) => PlayerStats(name: "Bowler ${index + 1}"));
 
   Match.fromJson(Map<String, dynamic> json, this.id)
       : team1Name = json['team1Name'],
         team2Name = json['team2Name'],
-        team1Players = (json['team1Players'] as List)
-            .map((item) => PlayerStats.fromJson(item))
-            .toList(),
-        team2Players = (json['team2Players'] as List)
-            .map((item) => PlayerStats.fromJson(item))
-            .toList(),
+        team1Players = (json['team1Players'] as List?)
+                ?.map((item) => PlayerStats.fromJson(item))
+                .toList() ??
+            List.generate(5, (index) => PlayerStats(name: "Batter ${index + 1}")),
+        team2Players = (json['team2Players'] as List?)
+                ?.map((item) => PlayerStats.fromJson(item))
+                .toList() ??
+            List.generate(5, (index) => PlayerStats(name: "Bowler ${index + 1}")),
         totalRuns = json['totalRuns'],
         wickets = json['wickets'],
         ballsDelivered = json['ballsDelivered'],
