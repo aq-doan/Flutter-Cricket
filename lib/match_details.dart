@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 import 'match.dart';
 import 'player_detail.dart';
 import 'score_recording.dart';
+import 'dart:convert';
 
 class MatchDetails extends StatefulWidget {
   final String? id;
@@ -61,6 +63,15 @@ class _MatchDetailsState extends State<MatchDetails> {
     return Scaffold(
       appBar: AppBar(
         title: Text(adding ? "Add Match" : "Match Details"),
+        actions: [
+          if (match != null)
+            IconButton(
+              icon: Icon(Icons.share),
+              onPressed: () {
+                _shareBallOutcomesAsCSV(match!);
+              },
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8),
@@ -108,78 +119,32 @@ class _MatchDetailsState extends State<MatchDetails> {
                 ),
               ),
               const Divider(),
+              TextFormField(
+                controller: team1Controller,
+                decoration: InputDecoration(labelText: "Team 1 Name"),
+              ),
               const Text(
                 "Team 1 Players",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               for (var i = 0; i < 5; i++)
-                GestureDetector(
-                  onTap: () async {
-                    if (match != null &&
-                        i < (match?.team1Players?.length ?? 0)) {
-                      var result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PlayerDetail(
-                              player: match?.team1Players?[i] ??
-                                  PlayerStats(name: "Unknown")),
-                        ),
-                      );
-
-                      if (result == 'update') {
-                        setState(() {
-                          match =
-                              Provider.of<MatchModel>(context, listen: false)
-                                  .get(widget.id);
-                        });
-                      }
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: ListTile(
-                      title: Text(
-                          match?.team1Players[i]?.name ?? "Batter ${i + 1}"),
-                      subtitle: Text(
-                          "Runs: ${match?.team1Players[i]?.runs} - Balls: ${match?.team1Players[i]?.ballsFaced}"),
-                    ),
-                  ),
+                TextFormField(
+                  controller: team1PlayersControllers[i],
+                  decoration: InputDecoration(labelText: "Player ${i + 1}"),
                 ),
               const Divider(),
+              TextFormField(
+                controller: team2Controller,
+                decoration: InputDecoration(labelText: "Team 2 Name"),
+              ),
               const Text(
                 "Team 2 Players",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               for (var i = 0; i < 5; i++)
-                GestureDetector(
-                  onTap: () async {
-                    if (match != null &&
-                        i < (match?.team2Players?.length ?? 0)) {
-                      var result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PlayerDetail(
-                              player: match?.team2Players?[i] ??
-                                  PlayerStats(name: "Unknown")),
-                        ),
-                      );
-
-                      if (result == 'update') {
-                        setState(() {
-                          match =
-                              Provider.of<MatchModel>(context, listen: false)
-                                  .get(widget.id);
-                        });
-                      }
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: ListTile(
-                      title: Text(
-                          match?.team2Players[i]?.name ?? "Bowler ${i + 1}"),
-                      subtitle: Text(
-                          "Lost: ${match?.team2Players[i]?.runsLost} - Wickets: ${match?.team2Players[i]?.wickets} - Balls: ${match?.team2Players[i]?.ballsDelivered}"),
-                    ),
-                  ),
+                TextFormField(
+                  controller: team2PlayersControllers[i],
+                  decoration: InputDecoration(labelText: "Player ${i + 1}"),
                 ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -253,5 +218,14 @@ class _MatchDetailsState extends State<MatchDetails> {
         ),
       ),
     );
+  }
+
+  void _shareBallOutcomesAsCSV(Match match) {
+    final buffer = StringBuffer();
+    buffer.writeln('type,runs,description,batter,bowler');
+    for (var outcome in match.ballOutcomes) {
+      buffer.writeln('${outcome.type},${outcome.runs},${outcome.description},${outcome.batter},${outcome.bowler}');
+    }
+    Share.share(buffer.toString(), subject: 'Ball Outcomes');
   }
 }

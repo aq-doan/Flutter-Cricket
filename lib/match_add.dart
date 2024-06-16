@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'match.dart';
-import 'score_recording.dart'; // Import the ScoreRecording page
+import 'score_recording.dart';
 
 class MatchAdd extends StatefulWidget {
   const MatchAdd({Key? key}) : super(key: key);
@@ -15,7 +15,6 @@ class _MatchAddState extends State<MatchAdd> {
   final team1Controller = TextEditingController();
   final team2Controller = TextEditingController();
 
-  // Add controllers for each player in the teams
   final List<TextEditingController> team1PlayersControllers = List.generate(5, (index) => TextEditingController());
   final List<TextEditingController> team2PlayersControllers = List.generate(5, (index) => TextEditingController());
 
@@ -42,7 +41,6 @@ class _MatchAddState extends State<MatchAdd> {
                   return null;
                 },
               ),
-              // Add TextFormFields for each player in team 1
               for (var i = 0; i < 5; i++)
                 TextFormField(
                   decoration: InputDecoration(labelText: "Team 1 Player ${i + 1}"),
@@ -64,7 +62,6 @@ class _MatchAddState extends State<MatchAdd> {
                   return null;
                 },
               ),
-              // Add TextFormFields for each player in team 2
               for (var i = 0; i < 5; i++)
                 TextFormField(
                   decoration: InputDecoration(labelText: "Team 2 Player ${i + 1}"),
@@ -88,7 +85,6 @@ class _MatchAddState extends State<MatchAdd> {
 
                     await Provider.of<MatchModel>(context, listen: false).add(newMatch);
 
-                    // Fetch the added match to get its ID
                     var matchModel = Provider.of<MatchModel>(context, listen: false);
                     Match? addedMatch = matchModel.items.firstWhere((match) =>
                       match.team1Name == newMatch.team1Name &&
