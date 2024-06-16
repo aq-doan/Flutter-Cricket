@@ -39,6 +39,7 @@ class PlayerStats {
   int ballsDelivered;
   int runsLost;
   int wickets;
+  String imageUrl;
 
   PlayerStats({
     required this.name,
@@ -47,6 +48,7 @@ class PlayerStats {
     this.ballsDelivered = 0,
     this.runsLost = 0,
     this.wickets = 0,
+    this.imageUrl = '',
   });
 
   PlayerStats.fromJson(Map<String, dynamic> json)
@@ -55,7 +57,8 @@ class PlayerStats {
         ballsFaced = json['ballsFaced'],
         ballsDelivered = json['ballsDelivered'],
         runsLost = json['runsLost'],
-        wickets = json['wickets'];
+        wickets = json['wickets'],
+        imageUrl = json['imageUrl'] ?? '';
 
   Map<String, dynamic> toJson() => {
         'name': name,
@@ -64,6 +67,7 @@ class PlayerStats {
         'ballsDelivered': ballsDelivered,
         'runsLost': runsLost,
         'wickets': wickets,
+        'imageUrl': imageUrl,
       };
 }
 
@@ -138,6 +142,7 @@ class Match {
         'ballOutcomes': ballOutcomes.map((outcome) => outcome.toJson()).toList(),
       };
 
+//for undo
   Match copy() {
     return Match(
       team1Name: team1Name,
@@ -226,6 +231,7 @@ class MatchModel extends ChangeNotifier {
       for (var p in match.team1Players) {
         if (p.name == player.name) {
           p.name = player.name;
+          p.imageUrl = player.imageUrl;
           await updateItem(match.id, match);
           return;
         }
@@ -233,6 +239,7 @@ class MatchModel extends ChangeNotifier {
       for (var p in match.team2Players) {
         if (p.name == player.name) {
           p.name = player.name;
+          p.imageUrl = player.imageUrl;
           await updateItem(match.id, match);
           return;
         }
