@@ -39,7 +39,6 @@ class _ScoreRecordingState extends State<ScoreRecording> {
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () async {
-              // Save the updated match details
               updateMatchDetails();
               await Provider.of<MatchModel>(context, listen: false).updateItem(match.id, match);
               Navigator.popUntil(context, ModalRoute.withName('/')); // Navigate back to main page
@@ -209,7 +208,6 @@ class _ScoreRecordingState extends State<ScoreRecording> {
   void handleOutcome(String outcome) {
     if (isGameOver) return;
     setState(() {
-      // Save the current state before making changes
       matchHistory.add(match.copy());
 
       var currentBatter = match.team1Players[currentBatterIndex];
@@ -372,6 +370,7 @@ class _ScoreRecordingState extends State<ScoreRecording> {
     nonStrikerIndex = (currentBatterIndex + 1) % match.team1Players.length;
   }
 
+  //implemented by GPT
   void showGameOverDialog() {
     setState(() {
       isGameOver = true;
